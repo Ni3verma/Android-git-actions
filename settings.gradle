@@ -1,0 +1,2 @@
+rootProject.name = "Android git actions"
+include ':app'
