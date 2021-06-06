@@ -79,7 +79,6 @@ jobs:
         with:
           api-level: 29
           script: ./gradlew connectedCheck
-        run: ./gradlew test
 
       - name: upload test result
         uses: actions/upload-artifact@v2
