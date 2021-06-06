@@ -13,66 +13,85 @@ env:
   DETEKT_RELEASE_TAG: v1.15.0
 
 jobs:
-#  build:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#
-#      - name: Make gradlew executable
-#        run: chmod +x ./gradlew
-#
-#      - name: Build app
-#        run: ./gradlew assemble
-#
-#  lint:
-#    needs: [build]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#
-#      - name: Make gradlew executable
-#        run: chmod +x ./gradlew
-#
-#      - name: Run lint
-#        run: ./gradlew lint
-#
-#      - name: upload html lint report
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: lint.html
-#          path: app/build/reports/lint-results.html
-#
-#      - name: Run ktlint
-#        run: ./gradlew app:ktlintCheck --daemon
-#
-#
-#  unit-test:
-#    needs: [build]
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - uses: actions/checkout@v2
-#
-#      - name: Make gradlew executable
-#        run: chmod +x ./gradlew
-#
-#      - name: Run Unit test
-#        run: ./gradlew test
-#
-#      - name: upload test result
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: Unit test result
-#          path: app/build/reports/tests/testDebugUnitTest/
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build app
+        run: ./gradlew assemble
+
+  lint:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run lint
+        run: ./gradlew lint
+
+      - name: upload html lint report
+        uses: actions/upload-artifact@v2
+        with:
+          name: lint.html
+          path: app/build/reports/lint-results.html
+
+      - name: Run ktlint
+        run: ./gradlew app:ktlintCheck --daemon
+
+  unit-test:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run Unit test
+        run: ./gradlew test
+
+      - name: upload test result
+        uses: actions/upload-artifact@v2
+        with:
+          name: Unit test result
+          path: app/build/reports/tests/testDebugUnitTest/
+
+  instrumentation-test:
+    needs: [ unit-test ]
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run espresso test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew connectedCheck
+        run: ./gradlew test
+
+      - name: upload test result
+        uses: actions/upload-artifact@v2
+        with:
+          name: Instrumentation test result
+          path: app/build/reports/androidTests/connected/
 
   Detekt:
     name: Detekt Scan
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
     - name: Make gradlew executable
