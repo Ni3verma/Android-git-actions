@@ -5,6 +5,9 @@ plugins {
     id "io.gitlab.arturbosch.detekt"
 }
 
+apply from: '../CICD/cicd.gradle'
+
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -31,33 +34,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
-    }
-}
-
-static def isLinuxOrMacOs() {
-    def osName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
-    return osName.contains('linux') || osName.contains('mac os') || osName.contains('macos')
-}
-
-task copyGitHooks(type: Copy) {
-    description 'Copies the git hooks from CICD/gitHooks to the .git folder.'
-    from("${rootDir}/CICD/gitHooks/") {
-        include '**/*.sh'
-        rename '(.*).sh', '$1'
-    }
-    into "${rootDir}/.git/hooks"
-}
-
-task installGitHooks(type: Exec) {
-    description 'Installs the git hooks from CICD/gitHooks.'
-    group 'git hooks'
-    workingDir rootDir
-    commandLine 'chmod'
-    args '-R', '+x', '.git/hooks/'
-    dependsOn copyGitHooks
-    onlyIf { isLinuxOrMacOs() }
-    doLast {
-        logger.info('Git hook installed successfully.')
     }
 }
 
