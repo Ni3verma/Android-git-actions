@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'org.jlleitschuh.gradle.ktlint'
+    id "io.gitlab.arturbosch.detekt"
 }
 
 android {
@@ -30,6 +31,27 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+}
+
+task copyGitHooks(type: Copy) {
+    description 'Copies the git hooks from CICD/gitHooks to the .git folder.'
+    from("${rootDir}/CICD/gitHooks/") {
+        include '**/*.sh'
+        rename '(.*).sh', '$1'
+    }
+    into "${rootDir}/.git/hooks"
+}
+
+task installGitHooks(type: Exec) {
+    description 'Installs the git hooks from CICD/gitHooks.'
+    group 'git hooks'
+    workingDir rootDir
+    commandLine 'chmod'
+    args '-R', '+x', '.git/hooks/'
+    dependsOn copyGitHooks
+    doLast {
+        logger.info('Git hook installed successfully.')
     }
 }
 
