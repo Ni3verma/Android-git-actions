@@ -120,7 +120,7 @@ jobs:
         checkout_path: ${{ github.workspace }}
 
     - name: upload detekt html report
-        uses: actions/upload-artifact@v2
-        with:
-          name: detektReport.html
-          path: app/build/reports/detekt/detekt.html
+      uses: actions/upload-artifact@v2
+      with:
+        name: detektReport.html
+        path: app/build/reports/detekt/detekt.html
