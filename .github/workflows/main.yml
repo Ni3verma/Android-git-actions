@@ -1,32 +1,21 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
-
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   
 env:
   # Release tag associated with version of Detekt to be installed
   # SARIF support (required for this workflow) was introduced in Detekt v1.15.0
   DETEKT_RELEASE_TAG: v1.15.0
-  
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Make gradlew executable
@@ -38,14 +27,32 @@ jobs:
       - name: upload html lint report
         uses: actions/upload-artifact@v2
         with:
-          name: index.html
+          name: lint.html
           path: app/build/reports/lint-results.html
 
       - name: Run ktlint
         run: ./gradlew app:ktlintCheck --daemon
 
 
-  # second job : Detekt scan
+  unit-test:
+    needs: [lint]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run Unit test
+        run: ./gradlew test
+
+      - name: upload test result
+        uses: actions/upload-artifact@v2
+        with:
+          name: Unit test result
+          path: app/build/reports/tests/testDebugUnitTest/
+
   scan:
     name: Detekt Scan
     # The type of runner that the job will run on
@@ -111,3 +118,9 @@ jobs:
         # Path to SARIF file relative to the root of the repository
         sarif_file: ${{ github.workspace }}/detekt.sarif.json
         checkout_path: ${{ github.workspace }}
+
+    - name: upload detekt html report
+        uses: actions/upload-artifact@v2
+        with:
+          name: detektReport.html
+          path: app/build/reports/detekt/detekt.html
