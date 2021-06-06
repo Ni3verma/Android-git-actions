@@ -34,6 +34,11 @@ android {
     }
 }
 
+static def isLinuxOrMacOs() {
+    def osName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
+    return osName.contains('linux') || osName.contains('mac os') || osName.contains('macos')
+}
+
 task copyGitHooks(type: Copy) {
     description 'Copies the git hooks from CICD/gitHooks to the .git folder.'
     from("${rootDir}/CICD/gitHooks/") {
@@ -50,6 +55,7 @@ task installGitHooks(type: Exec) {
     commandLine 'chmod'
     args '-R', '+x', '.git/hooks/'
     dependsOn copyGitHooks
+    onlyIf { isLinuxOrMacOs() }
     doLast {
         logger.info('Git hook installed successfully.')
     }
